@@ -9,7 +9,7 @@ import Foundation
 
 struct Calculator {
     
-private struct ArithmeticExpression: Equatable {
+    private struct ArithmeticExpression: Equatable {
         var number: Decimal
         var operation: ArithmeticOperation
         
@@ -77,10 +77,67 @@ private struct ArithmeticExpression: Equatable {
         }
     }
     
-         mutating  private func SetOperator(_ operator: ArithmeticOperation) {
+    mutating  private func SetOperation(_ operation: ArithmeticOperation){
+        guard var number = newNumber ?? result else { return }
+        if let existingExpression = expression {
+            number = existingExpression.evaluate(with: number)
+        }
+        expression = ArithmeticExpression(number: number, operation: operation)
+        newNumber = nil
     
     }
-    
+    mutating func toggleSign() {
+        if let number = newNumber {
+            newNumber = -number
+            return
+            
+        }
+        if let number = result {
+            result = -number
+            return
+        }
+        carryingNegative.toggle()
+    }
+    mutating func setpercent (){
+        if let number = newNumber {
+            newNumber = number / 100
+            return
+        }
+        if let number = result {
+            result = number / 100
+            return
+        }
+        
+            }
+    mutating func setdecimal(){
+        if containsDecimal {return}
+        carryingDecimal = true
+    }
+    mutating func evaluate() {
+        guard let number = newNumber, let expressiontoevaluate = expression else { return }
+        result = expressiontoevaluate.evaluate(with: number)
+        expression = nil
+        newNumber = nil
+    }
+    mutating func allClear() {
+        newNumber = nil
+        expression = nil
+        result = nil
+        carryingNegative = false
+        carryingDecimal = false
+        carryingZeroCount = 0
+    }
+    mutating func clear() {
+        newNumber = nil
+        carryingNegative = false
+        carryingDecimal = false
+        carryingZeroCount = 0
+        pressedClear = true
+    }
+    private func operationisAllowed(_ operation: ArithmeticOperation) -> Bool {
+        return expression?.operation == operation && newNumber == nil
+        
+    }
     private func getNumberString(forNumber number: Decimal?, withCommas: Bool = false) -> String {
         var numberString = (withCommas ? number?.formatted(.number) : number.map(String.init)) ?? "0"
         
